@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'detailrestaurant.dart';
+import 'donerestaurants.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,11 +42,19 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class RestaurantListPage extends StatelessWidget {
+class RestaurantListPage extends StatefulWidget {
   static const routeName='restaurant_list';
-  const RestaurantListPage({Key? key}): super(key:key);
-  // final String title;
+  final List<Restaurants> doneRestaurantsList;
 
+  const RestaurantListPage({Key? key, required this.doneRestaurantsList}): super(key:key);
+
+  @override
+  State<RestaurantListPage> createState() => _RestaurantListPageState();
+}
+
+class _RestaurantListPageState extends State<RestaurantListPage> {
+  // final String title;
+  final List<Restaurants> doneRestaurantsList = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,20 +62,13 @@ class RestaurantListPage extends StatelessWidget {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: const Text("Restaurant App"),
+        actions: <Widget>[
+          IconButton(onPressed: (){
+            Navigator.pushNamed(context, DoneRestaurantsListPage.routeName);
+          }, icon: Icon(Icons.done))
+        ],
       ),
-      body: FutureBuilder<String>(
-        //DefaultAssetBundle == widget yang membaca data yang kita berikan
-        future: DefaultAssetBundle.of(context).loadString('local_restaurant.json'),
-        builder: (context, snapshot) {
-          final List<Restaurants> restaurants = parseRestaurants(snapshot.data);
-          return ListView.builder(
-              itemCount: restaurants.length,
-              itemBuilder: (context, index) {
-                return _buildRestaurantItem(context, restaurants[index]);
-              }
-          );
-        },
-      ),
+      body: RestaurantList(doneRestaurantsList: doneRestaurantsList),
 
     );
   }
@@ -78,21 +80,94 @@ class RestaurantListPage extends StatelessWidget {
   }
 }
 
-Widget _buildRestaurantItem(BuildContext context, Restaurants resto) {
-  return Material (
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        leading: Image.network(
-          resto.pictureId,
-          width: 100,
+// stateless => stateful == supaya bisa nambah variable
+// class RestaurantList extends StatefulWidget
+class RestaurantList extends StatefulWidget{
+  final List<Restaurants> doneRestaurantsList;
+  const RestaurantList({Key ? key, required doneRestaurantsList, required this.doneRestaurantsList}):super(key :key);
+  @override
+  State<RestaurantList> createState()=> _RestaurantListState();
+}
+
+class _RestaurantListState extends State<RestaurantList>{
+  // const RestaurantList({Key? key}): super (key:key);
+  final List<Restaurants> _doneRestaurants = const [];
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      //DefaultAssetBundle == widget yang membaca data yang kita berikan
+      future: DefaultAssetBundle.of(context).loadString('local_restaurant.json'),
+      builder: (context, snapshot) {
+        final List<Restaurants> restaurants = parseRestaurants(snapshot.data);
+        return ListView.builder(
+          itemCount: restaurants.length,
+          itemBuilder: (context, index) {
+            // return restaurantItem(restaurants[index]);
+            return restaurantItem(
+                resto: restaurants[index],
+                isDone: _doneRestaurants.contains(restaurants[index]),
+                onClick: (){
+                  setState(() {
+                    _doneRestaurants.add(restaurants[index]);
+                  });
+                },
+            );
+          }
+        );
+      },
+    );
+  }
+}
+
+class restaurantItem extends StatelessWidget{
+  final Restaurants resto;
+  final bool isDone;
+  // final function() onClick;
+  final Function() onClick;
+  const restaurantItem({
+    Key? key
+    , required this.resto
+    , required this.isDone
+    , required this.onClick
+  }):super(key:key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Material (
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          leading: Image.network(
+            resto.pictureId,
+            width: 100,
+          ),
+          title: Text(resto.name),
+          subtitle: Column(
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.add_location),
+                  Text(resto.city),
+                ],
+              ),
+              Row(
+                children: [
+                  Icon(Icons.star),
+                  Text(resto.rating.toString()),
+                ],
+              ),
+            ],
+          ),
+           trailing: isDone? const Icon(Icons.done) :
+            ElevatedButton(
+             child: Text("Done"),
+             onPressed: onClick,
+           ),
+           onTap: () {
+              Navigator.pushNamed(context, DetailRestaurantPage.routeName,arguments: resto);
+           },
         ),
-        title: Text(resto.name),
-        subtitle: Text(resto.description),
-         onTap: () {
-            Navigator.pushNamed(context, DetailRestaurantPage.routeName,arguments: resto);
-         },
-      ),
-  );
+    );
+  }
 }
 
 List<Restaurants> parseRestaurants(String? data){

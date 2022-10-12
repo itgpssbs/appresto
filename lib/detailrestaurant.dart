@@ -11,10 +11,11 @@ class DetailRestaurantPage extends StatelessWidget{
     // TODO : implemend build
     return Scaffold(
         appBar: AppBar(
-          title: const Text('News'),
+          title: Text(resto.name),
         ),
         body: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Image.network(resto.pictureId),
               Padding(
@@ -22,20 +23,41 @@ class DetailRestaurantPage extends StatelessWidget{
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(resto.description),
-                      const Divider(color: Colors.grey,),
                       Text(
-                        resto.name,
-                        style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w100,
-                            fontSize: 24
+                        resto.description,
+                        maxLines: 4,
+                        // overflow: TextOverFlow.ellipsis,
+                      ),
+                      Divider(color: Colors.grey),
+                      Container(
+                        width: 1000,
+                        height: 100,
+                        child:ListView.builder(
+                          shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: resto.menus.foods.length,
+                            itemBuilder: (BuildContext context,int index)=> Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Card(
+                                child: Center(
+                                  child: Text(resto.menus.foods[index].name.toString()),
+                                ),
+                              ),
+                            ),
                         ),
                       ),
-                      const Divider(color: Colors.grey,),
-                      Text(resto.city),
-                      // Text('Date: ${resto.publishedAt}', ),
-                      const SizedBox(height: 10),
+                      // Text(
+                      //   resto.name,
+                      //   style: const TextStyle(
+                      //       color: Colors.black,
+                      //       fontWeight: FontWeight.w100,
+                      //       fontSize: 24
+                      //   ),
+                      // ),
+                      // const Divider(color: Colors.grey,),
+                      // Text(resto.city),
+                      // // Text('Date: ${resto.publishedAt}', ),
+                      // const SizedBox(height: 10),
                     ],
                   )
               )

@@ -4,8 +4,8 @@ import 'foods.dart';
 import 'drinks.dart';
 
 class Menus {
-  List<Foods>? foods;
-  List<Drinks>? drinks;
+  List<Foods> foods;
+  List<Drinks> drinks;
 
   Menus({required this.foods, required this.drinks});
 
@@ -32,10 +32,10 @@ class Menus {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
     if (foods != null) {
-      data['foods'] = foods!.map((v) => v.toJson()).toList();
+      data['foods'] = foods.map((v) => v.toJson()).toList();
     }
     if (drinks != null) {
-      data['drinks'] = drinks!.map((v) => v.toJson()).toList();
+      data['drinks'] = drinks.map((v) => v.toJson()).toList();
     }
     return data;
   }
